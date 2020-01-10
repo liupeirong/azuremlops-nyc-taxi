@@ -1,0 +1,14 @@
+name: nyctaxi-inference-env
+channels:
+- conda-forge
+- anaconda
+dependencies:
+- python=3.6.9
+- scikit-learn=0.22
+- numpy=1.17.4
+- joblib=0.13.2
+- lightgbm=2.3.0
+- pip:
+  - azureml-defaults==1.0.81
+  - azureml-monitoring==0.1.0a17
+  - inference-schema[numpy-support]==1.0.1

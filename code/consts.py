@@ -1,0 +1,6 @@
+train_environment_name = 'greentaxi_train_env'
+inference_environment_name = 'greentaxi_inference_env'
+model_name = 'greentaxi_lgbm_pkl'
+service_name = 'greentaxisvc'
+experiment_name = 'greentaxi_experiment'
+data_experiment_name = 'greentaxi_data_process'

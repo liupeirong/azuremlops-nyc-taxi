@@ -1,0 +1,2 @@
+vendorID,passengerCount,tripDistance,pickupLongitude,pickupLatitude,dropoffLongitude,dropoffLatitude,totalAmount,month_num,day_of_month,day_of_week,hour_of_day,duration
+2,5,1.48,-73.9630355834961,40.65463638305664,-73.98068237304688,40.66010665893555,7.3,1,26,0,13,6

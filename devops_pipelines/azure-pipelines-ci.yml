@@ -1,0 +1,50 @@
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    exclude:
+    - readme.md
+    - notebooks/*
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- bash: echo "##vso[task.prependpath]$CONDA/bin"
+  displayName: Add conda to PATH
+
+- bash: conda env create --quiet --file devops_pipelines/cicd_env.yml
+  displayName: Create Anaconda environment
+
+- bash: |
+    source activate azureml-py36-cicd
+    flake8 --output-file=lint-testresults.xml --format junit-xml
+  workingDirectory: code
+  displayName: Lint code folder
+
+- bash: |
+    source activate azureml-py36-cicd
+    flake8 --output-file=lint-testresults.xml --format junit-xml
+  workingDirectory: ml_service
+  displayName: Lint ml_service folder
+
+- bash: |
+    source activate azureml-py36-cicd
+    pytest --junitxml=junit/unit-testresults.xml --cov=code --cov-report=xml --cov-report=html
+  condition: succeededOrFailed()
+  displayName: Unit test
+
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/*-testresults.xml'
+    failTaskOnFailedTests: true
+
+- task: PublishCodeCoverageResults@1
+  condition: succeededOrFailed()
+  inputs:
+    codeCoverageTool: Cobertura
+    summaryFileLocation: '$(System.DefaultWorkingDirectory)/**/coverage.xml'
+    reportDirectory: '$(System.DefaultWorkingDirectory)/**/htmlcov'

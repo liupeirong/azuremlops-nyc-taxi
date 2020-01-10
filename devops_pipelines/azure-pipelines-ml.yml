@@ -1,0 +1,115 @@
+trigger: none
+
+resources:
+  pipelines:
+  - pipeline: nyctaxi_ci
+    source: nyctaxi_ci
+
+variables:
+- group: Azure ML
+
+stages:
+- stage: training
+  pool: 
+    vmImage: 'ubuntu-latest'
+  jobs:
+    - job: train_a_model
+      steps:
+        - task: UsePythonVersion@0
+          inputs:
+            versionSpec: '3.6'
+            addToPath: true
+            architecture: 'x64'
+          displayName: 'Use Python 3.6'
+
+        - task: Bash@3
+          inputs:
+            targetType: 'inline'
+            script: |
+              python -m pip install azureml-sdk==1.0.81
+              python -m pip install azureml-datadrift==1.0.81
+          displayName: 'Install AzureML SDK'
+
+        - task: AzureCLI@2
+          inputs:
+            azureSubscription: $(AZURE_SUBSCRIPTION_CXN_NAME)
+            scriptType: 'bash'
+            scriptLocation: 'inlineScript'
+            inlineScript: |
+              python 02_submit_training.py --input_folder train --build_id $(Build.BuildId)
+            workingDirectory: ml_service
+
+        - bash: |
+              mkdir -p $(Pipeline.Workspace)/variables
+              echo "AML_RUN_ID: $AML_RUN_ID"
+              echo "$AML_RUN_ID" > $(Pipeline.Workspace)/variables/AML_RUN_ID
+          displayName: 'Export training RUN ID'
+
+        - publish: $(Pipeline.Workspace)/variables
+          artifact: variables
+          displayName: 'Publish variable'
+
+        - task: PublishBuildArtifacts@1
+          inputs:
+            pathtoPublish: '$(System.DefaultWorkingDirectory)'
+            artifactName: src
+          displayName: 'Publish source code folder'
+
+- stage: deploying
+  pool: 
+    vmImage: 'ubuntu-latest'
+  jobs:
+    - deployment: register_model
+      environment: staging
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - download: current
+                artifact: variables
+                displayName: 'Download variables from previous stage'
+
+              - task: DownloadBuildArtifacts@0
+                inputs:
+                  artifactName: src
+                  downloadPath: $(Pipeline.Workspace)
+                displayName: 'Download src from previous stage'
+
+              - bash: |
+                    AML_RUN_ID=$(cat $(Pipeline.Workspace)/variables/AML_RUN_ID)
+                    echo "##vso[task.setvariable variable=AML_RUN_ID]$AML_RUN_ID"
+                displayName: 'Retrieve training RUN ID from artifacts'
+
+              - task: UsePythonVersion@0
+                inputs:
+                  versionSpec: '3.6'
+                  addToPath: true
+                  architecture: 'x64'
+                displayName: 'Use Python 3.6'
+
+              - task: Bash@3
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    python -m pip install azureml-sdk==1.0.81
+                    python -m pip install azureml-datadrift==1.0.81
+                displayName: 'Install AzureML SDK'
+
+              - task: AzureCLI@2
+                inputs:
+                  azureSubscription: $(AZURE_SUBSCRIPTION_CXN_NAME)
+                  scriptType: 'bash'
+                  scriptLocation: 'inlineScript'
+                  inlineScript: |
+                    echo $AML_RUN_ID
+                    python 03_deploy_model.py --train_data_folder train --run_id $AML_RUN_ID
+                  workingDirectory: $(Pipeline.Workspace)/src/ml_service
+
+              - task: Bash@3
+                inputs:
+                  targetType: 'inline'
+                  script: |
+                    echo $SVC_URI
+                    python 04_verify_deployment.py --uri $SVC_URI --token $SVC_TOKEN
+                  workingDirectory: $(Pipeline.Workspace)/src/ml_service
+                displayName: 'Test deployed service'
