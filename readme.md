@@ -1,5 +1,16 @@
+[![Lint & test](https://dev.azure.com/paigedevops/azuremlops-nyc-taxi/_apis/build/status/nyctaxi_ci?branchName=master)](https://dev.azure.com/paigedevops/azuremlops-nyc-taxi/_build/latest?definitionId=10&branchName=master)
+
+[![Data prep](https://dev.azure.com/paigedevops/azuremlops-nyc-taxi/_apis/build/status/nyctaxi_data_prep?branchName=master)](https://dev.azure.com/paigedevops/azuremlops-nyc-taxi/_build/latest?definitionId=11&branchName=master)
+
+[![ML train & deploy](https://dev.azure.com/paigedevops/azuremlops-nyc-taxi/_apis/build/status/nyctaxi_ml?branchName=master)](https://dev.azure.com/paigedevops/azuremlops-nyc-taxi/_build/latest?definitionId=12&branchName=master)
+
 ## Predict trip duration based on NYC taxi data
 
+### Prereq
+* Create an Azure ML Workspace
+* Create a training compute resource and an AKS based inference compute resource in the workspace
+* Create a Azure ML DataStore with raw data located in the "input" folder
+* Set up Azure DevOps variables
 
 ### Project structure
 * code
