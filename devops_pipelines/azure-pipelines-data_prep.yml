@@ -1,9 +1,11 @@
-trigger: none
-
-#resources:
-#  pipelines:
-#  - pipeline: nyctaxi_ci
-#    source: nyctaxi_ci
+resources:
+  pipelines:
+  - pipeline: nyctaxi_ci
+    source: nyctaxi_ci
+    trigger:
+      branches:
+        include:
+        - master
 
 variables:
 - group: Azure ML
@@ -11,27 +13,33 @@ variables:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- task: UsePythonVersion@0
-  inputs:
-    versionSpec: '3.6'
-    addToPath: true
-    architecture: 'x64'
-  displayName: 'Use Python 3.6'
+jobs:
+    - deployment: publish_training_data
+      environment: staging
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+            - task: UsePythonVersion@0
+              inputs:
+                versionSpec: '3.6'
+                addToPath: true
+                architecture: 'x64'
+              displayName: 'Use Python 3.6'
 
-- task: Bash@3
-  inputs:
-    targetType: 'inline'
-    script: |
-      python -m pip install azureml-sdk==1.0.81
-      python -m pip install azureml-datadrift==1.0.81
-  displayName: 'Install AzureML SDK'
+            - task: Bash@3
+              inputs:
+                targetType: 'inline'
+                script: |
+                  python -m pip install azureml-sdk==1.0.81
+                  python -m pip install azureml-datadrift==1.0.81
+              displayName: 'Install AzureML SDK'
 
-- task: AzureCLI@2
-  inputs:
-    azureSubscription: $(AZURE_SUBSCRIPTION_CXN_NAME)
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      python 01_submit_data_prep.py --input_folder input --output_folder train --build_id $(Build.BuildId)
-    workingDirectory: ml_service
+            - task: AzureCLI@2
+              inputs:
+                azureSubscription: $(AZURE_SUBSCRIPTION_CXN_NAME)
+                scriptType: 'bash'
+                scriptLocation: 'inlineScript'
+                inlineScript: |
+                  python 01_submit_data_prep.py --input_folder input --output_folder train --build_id $(Build.BuildId)
+                workingDirectory: $(Pipeline.Workspace)/nyctaxi_ci/src/ml_service
