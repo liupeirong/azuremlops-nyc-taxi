@@ -40,8 +40,9 @@ def read_raw_data(data_folder_or_file):
             parse_dates=['lpepPickupDatetime', 'lpepDropoffDatetime'],
             infer_datetime_format=True)
     else:
-        print("Reading files in raw data folder {}".format(data_folder_or_file))
-        all_files = glob.glob(os.path.join(data_folder, '**/*.csv'),
+        print("Reading files in raw data folder {}"
+              .format(data_folder_or_file))
+        all_files = glob.glob(os.path.join(data_folder_or_file, '**/*.csv'),
                               recursive=True)
         df_list = []
         for f in all_files:
