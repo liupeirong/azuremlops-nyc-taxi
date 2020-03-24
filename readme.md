@@ -9,14 +9,13 @@
 ### Prereq
 * Create an Azure ML Workspace
 * Create a training compute resource and an AKS based inference compute resource in the workspace
-* Create a Azure ML DataStore with raw data located in the "input" folder
 * Set up Azure DevOps variables
 
 ### Project structure
-* code
-* ml_service
-* devops_pipelines
-* notebooks
+* [code](code): python code for training and scoring
+* [ml_service](ml_service): python code for communicating with AzureML for model training and deployment
+* [devops_pipelines](devops_pipelines): Azure DevOps pipelines that use code in ml_service to orchestrate code linting, unit testing, model training, deployment and verification
+* [notebooks](notebooks): exploration notebook
 
 ### CI/CD
 * linting

@@ -3,7 +3,8 @@ from azureml.core import Workspace, Datastore, Dataset, Environment
 from azureml.core.runconfig import DEFAULT_CPU_IMAGE
 from azureml.core.model import Model
 from azureml.core.webservice import AksWebservice, Webservice
-from azureml.datadrift import DataDriftDetector, AlertConfiguration
+from azureml.datadrift.datadriftdetector import DataDriftDetector
+from azureml.datadrift import AlertConfiguration
 from datetime import datetime, timedelta
 
 

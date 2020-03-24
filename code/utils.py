@@ -27,23 +27,32 @@ def build_features(s):
     return s
 
 
-def read_raw_data(data_folder):
+def read_raw_data(data_folder_or_file):
     """
     Read all csv files from data/input folder and concat to
     return a single dataframe
     """
-    all_files = glob.glob(os.path.join(data_folder, '**/*.csv'),
-                          recursive=True)
-    df_list = []
-    for f in all_files:
-        df_from_each_file = pd.read_csv(
-            f,
+    if os.path.isfile(data_folder_or_file):
+        print("Reading raw data file {}".format(data_folder_or_file))
+        df = pd.read_csv(
+            data_folder_or_file,
             index_col=0,
             parse_dates=['lpepPickupDatetime', 'lpepDropoffDatetime'],
             infer_datetime_format=True)
-        df_list.append(df_from_each_file)
+    else:
+        print("Reading files in raw data folder {}".format(data_folder_or_file))
+        all_files = glob.glob(os.path.join(data_folder, '**/*.csv'),
+                              recursive=True)
+        df_list = []
+        for f in all_files:
+            df_from_each_file = pd.read_csv(
+                f,
+                index_col=0,
+                parse_dates=['lpepPickupDatetime', 'lpepDropoffDatetime'],
+                infer_datetime_format=True)
+            df_list.append(df_from_each_file)
 
-    df = pd.concat(df_list)
+        df = pd.concat(df_list)
     return df
 
 
