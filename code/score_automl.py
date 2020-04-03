@@ -35,9 +35,7 @@ def init():
 def run(data):
     try:
         result = model.predict(data)
-        print("local:{}".format(type(scoring_model)))
-        local_importance_values = scoring_model.explain(input_sample)
-        print(local_importance_values)
+        local_importance_values = scoring_model.explain(data)
         return {'result': result.tolist(), 'local_importance_values': local_importance_values}
     except Exception as e:
         result = str(e)
