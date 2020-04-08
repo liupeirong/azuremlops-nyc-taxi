@@ -24,7 +24,7 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
-        python -m pip install azureml-sdk==1.0.83
+        python -m pip install azureml-sdk[automl]==1.0.83
     displayName: 'Install AzureML SDK'
 
   - task: AzureCLI@2
