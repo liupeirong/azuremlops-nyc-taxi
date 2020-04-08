@@ -3,8 +3,6 @@ from azureml.core import Workspace, Datastore, Dataset, Environment
 from azureml.core.runconfig import DEFAULT_CPU_IMAGE
 from azureml.core.model import Model
 from azureml.core.webservice import AksWebservice, Webservice
-from azureml.datadrift.datadriftdetector import DataDriftDetector
-from azureml.datadrift import AlertConfiguration
 from datetime import datetime, timedelta
 
 
@@ -107,6 +105,9 @@ def deploy_service(ws, model, inference_config,
 def create_data_drift_detector_for_model(
         ws, model, service_name, compute_name,
         feature_list, alert_email_list, drift_threshold):
+    from azureml.datadrift.datadriftdetector import DataDriftDetector
+    from azureml.datadrift import AlertConfiguration
+
     services = [service_name]
     alert_config = AlertConfiguration(alert_email_list)
     start = datetime.utcnow() - timedelta(days=1)
