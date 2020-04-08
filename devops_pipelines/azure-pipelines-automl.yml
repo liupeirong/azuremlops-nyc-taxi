@@ -1,14 +1,10 @@
-resources:
-  pipelines:
-  - pipeline: nyctaxi_automl_create_pipeline
-    source: nyctaxi_ci
-    trigger:
-      branches:
-        include:
-        - master
-      paths:
-        include:
-        - ml_service/11_build_automl_pipeline.py
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - ml_service/11_build_automl_pipeline.py
 
 variables:
 - group: Azure ML
