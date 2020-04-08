@@ -1,0 +1,58 @@
+resources:
+  pipelines:
+  - pipeline: nyctaxi_automl_create_pipeline
+    source: nyctaxi_ci
+    trigger:
+      branches:
+        include:
+        - master
+      paths:
+        include:
+        - ml_service/11_build_automl_pipeline.py
+
+variables:
+- group: Azure ML
+
+pool: 
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.6'
+      addToPath: true
+      architecture: 'x64'
+    displayName: 'Use Python 3.6'
+
+  - task: Bash@3
+    inputs:
+      targetType: 'inline'
+      script: |
+        python -m pip install azureml-sdk==1.0.83
+    displayName: 'Install AzureML SDK'
+
+  - task: AzureCLI@2
+    inputs:
+      azureSubscription: $(AZURE_SUBSCRIPTION_CXN_NAME)
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        python 11_build_automl_pipeline.py --input_folder train --build_id $(Build.BuildId)
+      workingDirectory: ml_service
+
+  - bash: |
+        mkdir -p $(Pipeline.Workspace)/variables
+        echo "PipelineEndpoint: $PIPELINE_ENDPOINT_NAME"
+        echo "$PIPELINE_ENDPOINT_NAME" > $(Pipeline.Workspace)/variables/PIPELINE_ENDPOINT_NAME
+        echo "$PUBLISHED_ENDPOINT_VER" > $(Pipeline.Workspace)/variables/PUBLISHED_ENDPOINT_VERSION
+    displayName: 'Export PipelineEndpoint Name and Version'
+
+  - publish: $(Pipeline.Workspace)/variables
+    artifact: variables
+    displayName: 'Publish variable'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: '$(System.DefaultWorkingDirectory)'
+      artifactName: src
+    displayName: 'Publish source code folder'
