@@ -33,7 +33,7 @@ steps:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        python 11_build_automl_pipeline.py --input_folder train --build_id $(Build.BuildId)
+        python 11_build_automl_pipeline.py --training_data_file 201501.csv --build_id $(Build.BuildId)
       workingDirectory: ml_service
 
   - bash: |

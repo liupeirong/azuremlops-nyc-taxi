@@ -11,6 +11,7 @@ from azureml.pipeline.core import Pipeline, PipelineEndpoint
 CODE_PATH = '../code'
 TRAIN_STEP_NAME = 'nyc_automl_regression'
 PIPELINE_NAME = 'NYCtaxi_pipeline_test'
+PIPELINE_ENDPOINT_NAME = PIPELINE_NAME + '_endpoint'
 
 
 def main():
@@ -70,11 +71,21 @@ def publish_automl_pipeline(ws, pipeline, build_id):
         name=PIPELINE_NAME,
         description=build_id,
         version=build_id)
-    pipeline_endpoint = PipelineEndpoint.publish(
-        workspace=ws,
-        name=PIPELINE_NAME + '_endpoint',
-        pipeline=published_pipeline,
-        description='NYCtaxi_automl_training_pipeline_endpoint')
+
+    try:
+        pipeline_endpoint = PipelineEndpoint.get(
+            workspace=ws,
+            name=PIPELINE_ENDPOINT_NAME)
+        print("pipeline endpoint exists, add a version")
+        pipeline_endpoint.add_default(published_pipeline)
+    except Exception:
+        print("publish a new pipeline endpoint")
+        pipeline_endpoint = PipelineEndpoint.publish(
+            workspace=ws,
+            name=PIPELINE_ENDPOINT_NAME,
+            pipeline=published_pipeline,
+            description='NYCtaxi_automl_training_pipeline_endpoint')
+
     print(f'Published pipeline: {published_pipeline.name}')
     print(f' version: {published_pipeline.version}')
     print(f'Pipeline endpoint: {pipeline_endpoint.name}')
