@@ -25,6 +25,7 @@ steps:
       targetType: 'inline'
       script: |
         python -m pip install azureml-sdk[automl]==1.0.83
+        python -m pip install azureml-explain-model==1.0.83
     displayName: 'Install AzureML SDK'
 
   - task: AzureCLI@2
@@ -35,6 +36,7 @@ steps:
       inlineScript: |
         python 11_build_automl_pipeline.py --training_data_file 201501.csv --build_id $(Build.BuildId)
       workingDirectory: ml_service
+    displayName: 'Build ML pipeline'
 
   - bash: |
         mkdir -p $(Pipeline.Workspace)/variables
