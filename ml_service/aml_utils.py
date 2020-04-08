@@ -25,11 +25,11 @@ def setup_azureml():
     inference_target_name = os.environ.get('AML_INFERENCE_COMPUTE')
     ws = Workspace(subscription_id, resource_group, workspace_name)
     ds = Datastore.get(ws, datastore_name=datastore_name)
-    if training_target_name is not None:
+    if training_target_name:
         training_target = ws.compute_targets[training_target_name]
     else:
         training_target = None
-    if inference_target_name is not None:
+    if inference_target_name:
         inference_target = ws.compute_targets[inference_target_name]
     else:
         inference_target = None
